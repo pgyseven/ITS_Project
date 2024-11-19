@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+ 	<mapper namespace="com.ITSproj.mappers.replyMapper">
+  
+  		<select id="getReplyListAboutBoardNo" resultType="com.ITSproj.model.ReplyVO">
+  			select * from replyboard where boardNo = #{boardNo} order by replyNo desc
+  		</select>
+ 		
+ 		<insert id="insertReply">
+ 			insert into replyboard (replyer, content, boardNo) values(#{replyer}, #{content}, #{boardNo})
+ 		</insert>
+ 		
+ 		<update id="updateReply">
+ 			update replyboard set content = #{content} where replyNo = #{replyNo}
+ 		</update>
+ 		
+ 		<delete id="removeReply">
+ 			delete from replyboard where replyNo = #{replyNo}
+ 		</delete>
+ 
+	</mapper>

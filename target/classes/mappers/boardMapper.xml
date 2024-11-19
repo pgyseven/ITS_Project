@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="com.ITSproj.mappers.boardMapper">
+  
+  	<!-- 게시판 목록을 불러오는 쿼리문 -->
+  	<select id="getBoardWithPaging" resultType="com.ITSproj.model.BoardVO">
+		SELECT * FROM board ORDER BY boardNo DESC, refOrder ASC LIMIT #{startRowIndex}, #{viewPostCntPerPage} 	
+  	</select>
+  	
+  	<!-- 게시글 insert 쿼리문 -->
+  	<insert id="saveNewBoard">
+  		insert into board (title, writer, content) values(#{title}, #{writer}, #{content})
+  	</insert>
+  	
+  	<!-- 전체 데이터 갯수 가져오기 -->
+	<select id="selectTotalCount" resultType="int">
+		select count(*) from board
+	</select>
+	
+	<!-- boardNo번의 글을 수정하는 쿼리문 -->
+	<update id="updateBoardByBoardNo">
+		UPDATE board SET title = #{title}, content = #{content} WHERE boardNo = #{boardNo}
+	</update>
+	
+	<!-- 게시글의 상세정보를 담기 위한 resultmap 설정 -->
+	<resultMap type="com.ITSproj.model.BoardVO" id="bVOMap">
+		<result column="boardNo" property="boardNo" javaType="int" />
+		<result column="title" property="title" javaType="String" />
+		<result column="content" property="content" javaType="String" />
+		<result column="writer" property="writer" javaType="String" />
+		<result column="postDate" property="postDate" javaType="java.sql.Timestamp" />
+		<result column="readCount" property="readCount" javaType="int" />
+	</resultMap>
+	
+	<!--  게시글의 상세정보를 담는 조인 문 -->
+	<select id="selectBoardDetailInfoByBoardNo" resultMap="bVOMap">
+		select boardNo, title, content, writer, postDate, readCount from board where boardNo = #{boardNo}
+	</select>
+	
+	<!--  ipAddr의 유저가 boardNo글을 언제 조회했는지 날짜 차이를 얻어온다(조회한 적이 없다면 -1 반환) -->
+	<select id="selectBoardDateDiff"  resultType="int">
+		select ifnull(datediff(now(), (select readWhen from boardreadlog
+		where readWho = #{readwho} and boardNo = #{boardNo})), -1) as datediff
+	</select>
+	
+	<!-- BoardReadLog에 조회한 내역 저장  -->
+	<insert id="saveBoardReadLog">
+		insert into boardreadlog(readWho, boardNo) values(#{readwho}, #{boardNo})
+	</insert>
+	
+	<!-- 게시글의 조회수를 증가하는 쿼리문 -->
+	<update id="updateReadCount">
+		update board set readCount = readCount + 1 where boardNo = #{boardNo}
+	</update>
+	
+	<!--  조회수 증가한 날짜로 조회 내역 update -->
+	<update id="updateBoardReadLog">
+		update boardreadlog set readWhen = now() where readWho=#{readwho} and boardNo=#{boardNo}
+	</update>
+	
+	<!-- 게시글을 지우는 쿼리문 -->
+	<delete id="removeBoardByBoardNo">
+		delete from board where boardNo = #{boardNo}
+	</delete>
+	
+	<!-- 인기글 5개 가져오기 -->
+	<select id="selectPopBoards" resultType="com.ITSproj.model.BoardVO">
+		SELECT * FROM board ORDER BY readCount DESC, boardNo DESC limit 5
+	</select>
+ 
+ 
+ </mapper>

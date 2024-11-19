@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans
+	xmlns="http://www.springframework.org/schema/mvc"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc https://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.3.xsd
+		http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
+
+	<!-- DispatcherServlet Context: defines this servlet's request-processing 
+		infrastructure -->
+
+	<!-- Enables the Spring MVC @Controller programming model annotation방식으로 
+		설정 하겠다.의미 -->
+	<annotation-driven />
+
+	<!-- 예약 스케줄러를 어노테이션 방식으로 동작시킬 것임 <task:annotation-driven scheduler="scheduler"/> -->
+
+	<!-- Handles HTTP GET requests for /resources/** by efficiently serving 
+		up static resources in the ${webappRoot}/resources directory 정적인 파일(css, 
+		js, image등을) /resources 폴더 아래에 위치하게 하고 /resources/** 로 매핑 해 놓음 -->
+	<resources mapping="/resources/**" location="/resources/" />
+
+	<!-- Resolves views selected for rendering by @Controllers to .jsp resources 
+		in the /WEB-INF/views directory -->
+	<beans:bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<beans:property name="prefix" value="/WEB-INF/views/" />
+		<beans:property name="suffix" value=".jsp" />
+	</beans:bean>
+
+
+	<!-- 인터셉터가 동작하는 매핑 주소 설정 -->
+	<beans:bean id="loginInterceptor"
+		class="com.ITSproj.interceptor.LoginInterceptor" />
+	<!-- 로그인후에 들어가도록 하는 권한 인터셉터 -->
+	<beans:bean id="authInterceptor"
+		class="com.ITSproj.interceptor.AuthInterceptor" />
+
+	<interceptors>
+		<interceptor>
+			<mapping path="/loginPage" />
+			<mapping path="/login" />
+			<beans:ref bean="loginInterceptor" />
+		</interceptor>
+
+		<!-- auth인터셉터 -->
+		<interceptor>
+			<mapping path="/" />
+			<mapping path="/board/" />
+			<mapping path="/board/boardSave" />
+			<mapping path="/board/modifyBoard" />
+			<mapping path="/board/detail" />
+			<beans:ref bean="authInterceptor" />
+		</interceptor>
+
+	</interceptors>
+
+
+
+	<!-- 아래의 패키지를 조사(scan)하여 필요한 객체를 만들고, 스프링 컨테이너에 의해 관리되도록 한다. -->
+	<context:component-scan
+		base-package="com.ITSproj.controller" />
+
+</beans:beans>
